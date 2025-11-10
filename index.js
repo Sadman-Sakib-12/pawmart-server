@@ -1,0 +1,91 @@
+const express = require('express')
+const cors = require('cors')
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const app = express()
+const port = 3000
+// password=// AQeLZnTa1EUqEp0W
+app.use(cors())
+app.use(express.json())
+
+app.get('/', (req, res) => {
+    res.send('Hello World!')
+})
+app.get('/hello', (req, res) => {
+    res.send('how are you sakib!')
+})
+
+
+
+const uri = "mongodb+srv://model-db:AQeLZnTa1EUqEp0W@sakib.xono2ll.mongodb.net/?appName=Sakib";
+
+// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+const client = new MongoClient(uri, {
+    serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+    }
+});
+
+async function run() {
+    try {
+        await client.connect();
+
+        const db = client.db('model-db')
+        const modelCollection = db.collection('models')
+
+        // find//
+        // findone
+        app.get('/models', async (req, res) => {
+
+            const result = await modelCollection.find().toArray()
+            console.log(result)
+            res.send(result)
+        })
+        app.get('/models/:id', async (req, res) => {
+            const { id } = req.params
+            console.log(id)
+            const objectId = new ObjectId(id)
+            const result = await modelCollection.findOne({ _id: objectId })
+            res.send(
+                {
+                    success:true,
+                    result
+                }
+            )
+        })
+
+
+        // post method
+        app.post('/models', async (req, res) => {
+            const data = req.body
+            const result = await modelCollection.insertOne(data)
+            console.log(data)
+            res.send({
+                success: true,
+                result
+            })
+        })
+
+
+
+
+
+
+
+        await client.db("admin").command({ ping: 1 });
+        console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    } finally {
+        // Ensures that the client will close when you finish/error
+        // await client.close();
+    }
+}
+run().catch(console.dir);
+
+
+
+
+
+app.listen(port, () => {
+    console.log(`Example app listening on port ${port}`)
+})
