@@ -33,6 +33,7 @@ async function run() {
 
         const db = client.db('model-db')
         const modelCollection = db.collection('models')
+        const orderCollection = db.collection('order')
 
         // find//
         // findone
@@ -42,6 +43,17 @@ async function run() {
             console.log(result)
             res.send(result)
         })
+
+        app.get('/my-lisiting', async (req, res) => {
+            const email= req.query.email
+            const result = await modelCollection.find({created_by: email }).toArray()
+            res.send(
+                {
+                    success:true,
+                    result})
+        })
+
+
         app.get('/models/:id', async (req, res) => {
             const { id } = req.params
             console.log(id)
@@ -49,7 +61,7 @@ async function run() {
             const result = await modelCollection.findOne({ _id: objectId })
             res.send(
                 {
-                    success:true,
+                    success: true,
                     result
                 }
             )
@@ -60,6 +72,16 @@ async function run() {
         app.post('/models', async (req, res) => {
             const data = req.body
             const result = await modelCollection.insertOne(data)
+            console.log(data)
+            res.send({
+                success: true,
+                result
+            })
+        })
+
+        app.post('/order', async (req, res) => {
+            const data = req.body
+            const result = await orderCollection.insertOne(data)
             console.log(data)
             res.send({
                 success: true,
