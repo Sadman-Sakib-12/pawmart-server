@@ -44,13 +44,20 @@ async function run() {
             res.send(result)
         })
 
+        app.get('/latest-models', async (req, res) => {
+            const result = await modelCollection.find().sort({email: 'asc'}).limit(6).toArray()
+            console.log(result)
+            res.send(result)
+        })
+
         app.get('/my-lisiting', async (req, res) => {
-            const email= req.query.email
-            const result = await modelCollection.find({created_by: email }).toArray()
+            const email = req.query.email
+            const result = await modelCollection.find({ created_by: email }).toArray()
             res.send(
                 {
-                    success:true,
-                    result})
+                    success: true,
+                    result
+                })
         })
 
 
@@ -59,6 +66,17 @@ async function run() {
             console.log(id)
             const objectId = new ObjectId(id)
             const result = await modelCollection.findOne({ _id: objectId })
+            res.send(
+                {
+                    success: true,
+                    result
+                }
+            )
+        })
+
+        app.get('/category-filtered-product/:categoryName', async (req, res) => {
+            const categoryName = req.params.categoryName
+            const result = await modelCollection.find({ category:categoryName }).toArray()
             res.send(
                 {
                     success: true,
@@ -79,16 +97,34 @@ async function run() {
             })
         })
 
-        app.post('/order', async (req, res) => {
+        app.post('/order/:id', async (req, res) => {
             const data = req.body
+            const id=req.params.id
             const result = await orderCollection.insertOne(data)
             console.log(data)
+            const filter={_id:new ObjectId(id)}
+            const update={
+                $inc:{
+                    quantity:1
+                }
+            }
+            const counted=await modelCollection.updateOne(filter,update)
             res.send({
                 success: true,
-                result
+                result,counted
             })
         })
 
+        app.get('/my-order', async (req, res) => {
+            const email=req.query.email
+            const result = await orderCollection.find({email:email}).toArray()
+            res.send(
+                { 
+                    success:true,
+                    result
+                }
+            )
+        })
 
 
 
