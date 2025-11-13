@@ -24,7 +24,7 @@ const client = new MongoClient(uri, {
 
 async function run() {
     try {
-        await client.connect();
+        // await client.connect();
 
         const db = client.db('model-db')
         const modelCollection = db.collection('models')
@@ -35,13 +35,13 @@ async function run() {
         app.get('/models', async (req, res) => {
 
             const result = await modelCollection.find().toArray()
-            console.log(result)
+            // console.log(result)
             res.send(result)
         })
 
         app.get('/latest-models', async (req, res) => {
             const result = await modelCollection.find().sort({ email: 'asc' }).limit(6).toArray()
-            console.log(result)
+            // console.log(result)
             res.send(result)
         })
 
@@ -81,7 +81,7 @@ async function run() {
 
         app.get('/models/:id', async (req, res) => {
             const { id } = req.params
-            console.log(id)
+            // console.log(id)
             const objectId = new ObjectId(id)
             const result = await modelCollection.findOne({ _id: objectId })
             res.send(
@@ -108,7 +108,7 @@ async function run() {
         app.post('/models', async (req, res) => {
             const data = req.body
             const result = await modelCollection.insertOne(data)
-            console.log(data)
+            // console.log(data)
             res.send({
                 success: true,
                 result
@@ -119,7 +119,7 @@ async function run() {
             const data = req.body
             const id = req.params.id
             const result = await orderCollection.insertOne(data)
-            console.log(data)
+            // console.log(data)
             const filter = { _id: new ObjectId(id) }
             const update = {
                 $inc: {
@@ -152,10 +152,9 @@ async function run() {
             )
         })
 
-        await client.db("admin").command({ ping: 1 });
+        // await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
-        // Ensures that the client will close when you finish/error
         // await client.close();
     }
 }
