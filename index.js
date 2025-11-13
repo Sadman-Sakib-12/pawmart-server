@@ -45,7 +45,7 @@ async function run() {
         })
 
         app.get('/latest-models', async (req, res) => {
-            const result = await modelCollection.find().sort({email: 'asc'}).limit(6).toArray()
+            const result = await modelCollection.find().sort({ email: 'asc' }).limit(6).toArray()
             console.log(result)
             res.send(result)
         })
@@ -59,13 +59,26 @@ async function run() {
                     result
                 })
         })
-        
-        app.delete('/models/:id',async(req,res)=>{
-            const {id}=req.params
-            const objectId=new ObjectId(id)
-            const result=await modelCollection.deleteOne({_id:objectId})
+        app.put('/models/:id', async (req, res) => {
+            const { id } = req.params
+            const data = req.body
+            const objectId = new ObjectId(id)
+            const filter = { _id: objectId }
+            const update = {
+                $set: data
+            }
+            const result = await modelCollection.updateOne(filter, update)
             res.send({
-                success:true,
+                success: true,
+                result
+            })
+        })
+        app.delete('/models/:id', async (req, res) => {
+            const { id } = req.params
+            const objectId = new ObjectId(id)
+            const result = await modelCollection.deleteOne({ _id: objectId })
+            res.send({
+                success: true,
                 result
             })
         })
@@ -86,7 +99,7 @@ async function run() {
 
         app.get('/category-filtered-product/:categoryName', async (req, res) => {
             const categoryName = req.params.categoryName
-            const result = await modelCollection.find({ category:categoryName }).toArray()
+            const result = await modelCollection.find({ category: categoryName }).toArray()
             res.send(
                 {
                     success: true,
@@ -109,37 +122,40 @@ async function run() {
 
         app.post('/order/:id', async (req, res) => {
             const data = req.body
-            const id=req.params.id
+            const id = req.params.id
             const result = await orderCollection.insertOne(data)
             console.log(data)
-            const filter={_id:new ObjectId(id)}
-            const update={
-                $inc:{
-                    quantity:1
+            const filter = { _id: new ObjectId(id) }
+            const update = {
+                $inc: {
+                    quantity: 1
                 }
             }
-            const counted=await modelCollection.updateOne(filter,update)
+            const counted = await modelCollection.updateOne(filter, update)
             res.send({
                 success: true,
-                result,counted
+                result, counted
             })
         })
 
+        app.get('/category-filter/:categoryName', async (req, res) => {
+            const categoryName = req.params.categoryName
+            const result = await modelCollection.find({ category: categoryName }).toArray()
+            res.send({
+                success: true,
+                result
+            })
+        })
         app.get('/my-order', async (req, res) => {
-            const email=req.query.email
-            const result = await orderCollection.find({email:email}).toArray()
+            const email = req.query.email
+            const result = await orderCollection.find({ email: email }).toArray()
             res.send(
-                { 
-                    success:true,
+                {
+                    success: true,
                     result
                 }
             )
         })
-
-
-
-
-
 
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
