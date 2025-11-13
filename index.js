@@ -35,19 +35,19 @@ async function run() {
         app.get('/models', async (req, res) => {
 
             const result = await modelCollection.find().toArray()
-            // console.log(result)
+
             res.send(result)
         })
 
         app.get('/latest-models', async (req, res) => {
             const result = await modelCollection.find().sort({ email: 'asc' }).limit(6).toArray()
-            // console.log(result)
+
             res.send(result)
         })
 
         app.get('/my-lisiting', async (req, res) => {
             const email = req.query.email
-            const result = await modelCollection.find({ created_by: email }).toArray()
+            const result = await modelCollection.find({ email: email }).toArray()
             res.send(
                 {
                     success: true,
@@ -81,7 +81,7 @@ async function run() {
 
         app.get('/models/:id', async (req, res) => {
             const { id } = req.params
-            // console.log(id)
+
             const objectId = new ObjectId(id)
             const result = await modelCollection.findOne({ _id: objectId })
             res.send(
